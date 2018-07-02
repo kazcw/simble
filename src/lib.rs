@@ -463,18 +463,6 @@ impl Lexical {
 pub type Symbol = Lexical;
 
 #[cfg(feature = "nightly")]
-const fn assert_no_nuls(s: &[u8]) {
-    [()][(s[0] == 0
-             || s[((s.len() > 1) as usize)] == 0
-             || s[2 * ((s.len() > 2) as usize)] == 0
-             || s[3 * ((s.len() > 3) as usize)] == 0
-             || s[4 * ((s.len() > 4) as usize)] == 0
-             || s[5 * ((s.len() > 5) as usize)] == 0
-             || s[6 * ((s.len() > 6) as usize)] == 0
-             || s[7 * ((s.len() > 7) as usize)] == 0) as usize]
-}
-
-#[cfg(feature = "nightly")]
 #[cfg_attr(feature = "cargo-clippy", allow(cast_lossless))]
 const fn to_int_be(s: &[u8]) -> u64 {
     s[0] as u64
@@ -501,39 +489,89 @@ const fn to_int_le(s: &[u8]) -> u64 {
 }
 
 #[cfg(all(feature = "nightly", endian = "little"))]
-const fn to_int_native(s: &[u8]) { to_int_le(s) }
+const fn to_int_native(s: &[u8]) {
+    to_int_le(s)
+}
 
 #[cfg(all(feature = "nightly", endian = "big"))]
-const fn to_int_native(s: &[u8]) { to_int_be(s) }
+const fn to_int_native(s: &[u8]) {
+    to_int_be(s)
+}
 
 #[cfg(feature = "nightly")]
 #[cfg_attr(feature = "cargo-clippy", allow(unnecessary_operation))]
+const fn validate(s: &[u8]) {
+    [()][(s.len() == 0) as usize]; // assert non-empty
+    [()][(s.len() > 8) as usize]; // assert length <= 8
+    [()][(s[0] == 0              // assert no nulls
+             || s[((s.len() > 1) as usize)] == 0
+             || s[2 * ((s.len() > 2) as usize)] == 0
+             || s[3 * ((s.len() > 3) as usize)] == 0
+             || s[4 * ((s.len() > 4) as usize)] == 0
+             || s[5 * ((s.len() > 5) as usize)] == 0
+             || s[6 * ((s.len() > 6) as usize)] == 0
+             || s[7 * ((s.len() > 7) as usize)] == 0) as usize];
+}
+
+/// [nightly-only, experimental] `const fn` for parsing and validating a [`Printable`] at compile
+/// time. Note that due to current compiler limitations, the current implementation may be
+/// inefficient if used at runtime.
+///
+/// # Panics
+///
+/// Panics if the value provided is not a legal symbol; see [value
+/// restrictions](index.html#value-restrictions). Note: due to current compiler limitations,
+///
+/// # Examples
+/// ```
+/// # #[cfg(feature = "nightly")]
+/// # {
+/// use simble::{Printable, printable};
+/// const HELLO: Printable = printable("hello");
+/// assert_eq!(&HELLO, "hello");
+/// # }
+/// ```
+#[cfg(feature = "nightly")]
 pub const fn printable(s: &str) -> Printable {
     let s = s.as_bytes();
-    assert_no_nuls(s);
-    // check that length <= 8
-    [()][(s.len() > 8) as usize];
-    // the indexing ops will statically asserts that the input is non-empty
+    validate(s);
     let n = to_int_be(s);
     // this is safe because a non-empty sequence of non-zero bytes must be non-zero
     Printable(unsafe { NonZeroU64::new_unchecked(n) })
 }
 
+/// [nightly-only, experimental] `const fn` for parsing and validating a [`Lexical`] at compile
+/// time. Note that due to current compiler limitations, the current implementation may be
+/// inefficient if used at runtime.
+///
+/// # Panics
+///
+/// Panics if the value provided is not a legal symbol; see [value
+/// restrictions](index.html#value-restrictions).
+///
+/// # Examples
+/// ```
+/// # #[cfg(feature = "nightly")]
+/// # {
+/// use simble::{Lexical, lexical};
+/// const HELLO: Lexical = lexical("hello");
+/// assert_eq!(&HELLO.to_printable(), "hello");
+/// # }
+/// ```
 #[cfg(feature = "nightly")]
-#[cfg_attr(feature = "cargo-clippy", allow(unnecessary_operation))]
 pub const fn lexical(s: &str) -> Lexical {
     let s = s.as_bytes();
-    assert_no_nuls(s);
-    // check that length <= 8
-    [()][(s.len() > 8) as usize];
-    // the indexing ops will statically asserts that the input is non-empty
+    validate(s);
     let n = to_int_le(s);
     // this is safe because a non-empty sequence of non-zero bytes must be non-zero
     Lexical(unsafe { NonZeroU64::new_unchecked(n) })
 }
 
+/// Alias for [`lexical`].
 #[cfg(feature = "nightly")]
-pub const fn symbol(s: &str) -> Lexical { lexical(s) }
+pub const fn symbol(s: &str) -> Lexical {
+    lexical(s)
+}
 
 #[cfg(test)]
 mod tests {
