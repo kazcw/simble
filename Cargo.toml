@@ -1,0 +1,23 @@
+[package]
+name = "simble"
+version = "0.1.0"
+authors = ["Kaz Wesley <kaz@lambdaverse.org>"]
+description = "Simple symbols: allocation-less strings up to 8 bytes long"
+repository = "https://github.com/kazcw/simble"
+readme = "README.md"
+keywords = ["atom", "symbol", "intern", "string", "token"]
+categories = ["no-std"]
+license = "MIT OR Apache-2.0"
+
+[badges]
+travis-ci = { repository = "kazcw/simble" }
+is-it-maintained-issue-resolution = { repository = "kazcw/simble" }
+is-it-maintained-open-issues = { repository = "kazcw/simble" }
+maintenance = { status = "experimental" }
+
+[features]
+nightly = []
+
+[dependencies]
+failure = { version = "0.1", default-features = false }
+serde = { version = "1.0", optional = true }
