@@ -69,23 +69,7 @@ use core::fmt::{self, Debug, Display, Formatter};
 use core::mem;
 use core::slice;
 use core::str::{self, FromStr};
-
-#[cfg(feature = "nightly")]
 use core::num::NonZeroU64;
-
-#[cfg(not(feature = "nightly"))]
-#[derive(Copy, Clone, Eq, PartialEq, Hash, Ord, PartialOrd)]
-struct NonZeroU64(u64);
-
-#[cfg(not(feature = "nightly"))]
-impl NonZeroU64 {
-    unsafe fn new_unchecked(x: u64) -> Self {
-        NonZeroU64(x)
-    }
-    fn get(self) -> u64 {
-        self.0
-    }
-}
 
 #[derive(Debug)]
 enum ErrorInner {

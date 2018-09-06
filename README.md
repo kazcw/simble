@@ -22,5 +22,4 @@ Then Simble offers:
 
 Enable with the `nightly` feature:
 
-- non-null type usage, so that `size_of::<Option<Lexical>> == 8`
 - const fns, so that you can define symbols that will be parsed at compile time

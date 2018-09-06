@@ -1,6 +1,6 @@
 [package]
 name = "simble"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Kaz Wesley <kaz@lambdaverse.org>"]
 description = "Simple symbols: allocation-less strings up to 8 bytes long"
 repository = "https://github.com/kazcw/simble"
