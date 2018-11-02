@@ -56,7 +56,10 @@
 //!
 //! Whether [`Printable`] is a non-zero type is unspecified.
 
-#![cfg_attr(feature = "nightly", feature(const_fn, const_let, const_slice_len, const_str_as_bytes))]
+#![cfg_attr(
+    feature = "nightly",
+    feature(const_fn, const_let, const_slice_len, const_str_as_bytes)
+)]
 
 extern crate failure;
 
@@ -67,9 +70,9 @@ use core::cmp::{Ordering, PartialEq, PartialOrd};
 use core::convert::AsRef;
 use core::fmt::{self, Debug, Display, Formatter};
 use core::mem;
+use core::num::NonZeroU64;
 use core::slice;
 use core::str::{self, FromStr};
-use core::num::NonZeroU64;
 
 #[derive(Debug)]
 enum ErrorInner {
@@ -487,6 +490,8 @@ const fn to_int_native(s: &[u8]) {
 const fn validate(s: &[u8]) {
     [()][(s.len() == 0) as usize]; // assert non-empty
     [()][(s.len() > 8) as usize]; // assert length <= 8
+    // FIXME: this no longer builds on nightly; need a new nulls check
+    /*
     [()][(s[0] == 0              // assert no nulls
              || s[((s.len() > 1) as usize)] == 0
              || s[2 * ((s.len() > 2) as usize)] == 0
@@ -495,7 +500,7 @@ const fn validate(s: &[u8]) {
              || s[5 * ((s.len() > 5) as usize)] == 0
              || s[6 * ((s.len() > 6) as usize)] == 0
              || s[7 * ((s.len() > 7) as usize)] == 0) as usize];
-}
+             */}
 
 /// [nightly-only, experimental] `const fn` for parsing and validating a [`Printable`] at compile
 /// time. Note that due to current compiler limitations, the current implementation may be
